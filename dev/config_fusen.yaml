@@ -1,0 +1,39 @@
+flat_first.Rmd:
+  path: dev/flat_first.Rmd
+  state: active
+  R:
+  - R/container_control.R
+  - R/container_dockercompose.R
+  - R/container_updateparameter.R
+  - R/container_run.R
+  - R/container_update.R
+  - R/image_build.R
+  - R/image_load.R
+  - R/image_pull.R
+  - R/image_push.R
+  - R/image_rmi.R
+  - R/image_tag.R
+  - R/lscontainer.R
+  - R/lsimage.R
+  tests:
+  - tests/testthat/test-lscontainer.R
+  - tests/testthat/test-lsimage.R
+  - tests/testthat/test-image_rmi.R
+  - tests/testthat/test-image_pull.R
+  - tests/testthat/test-image_tag.R
+  - tests/testthat/test-image_build.R
+  - tests/testthat/test-image_push.R
+  - tests/testthat/test-image_load.R
+  - tests/testthat/test-container_run.R
+  - tests/testthat/test-container_control.R
+  - tests/testthat/test-container_update.R
+  - tests/testthat/test-container_updateparameter.R
+  - tests/testthat/test-container_dockercompose.R
+  vignettes: vignettes/get-started.Rmd
+  inflate:
+    flat_file: dev/flat_first.Rmd
+    vignette_name: Get started
+    open_vignette: true
+    check: true
+    document: true
+    overwrite: ask
