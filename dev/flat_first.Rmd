@@ -1,0 +1,696 @@
+---
+title: "dockerR: an R package for managing docker images & containers"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+<!-- 
+Run this 'development' chunk
+
+Store every call to library() that you need to run chunks line by line, as in a classical Rmd for analysis
+-->
+
+```{r development, include=FALSE}
+library(testthat)
+```
+
+<!--
+# Description of your package
+
+This will fill the description of your package.
+Fill and run the content of this chunk, before anything else. 
+
+Note: when you will use other flat templates, this part will be in a separate file. Do not be surprised!
+--> 
+
+```{r description, eval=FALSE}
+# Describe your package
+fusen::fill_description(
+  pkg = here::here(),
+  fields = list(
+    Title = "dockerR",
+    Description = "dockerR: an R package for managing docker images & containers.",
+    `Authors@R` = c(
+      person("Yanhua", "Zheng", email = "zyh3084989256@gmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-1103-9579"))
+    )
+  )
+)
+# Define License with use_*_license()
+usethis::use_mit_license("YanhuaZheng")
+
+
+# use packages
+
+usethis::use_pipe()
+usethis::use_package("fs")
+usethis::use_package("glue")
+usethis::use_package("fs")
+```
+
+# list the images in the local 
+
+
+```{r function-lscontainer}
+#' Add one to any value
+#' 
+#' @param base_command A str
+#' @param additional A str
+#'
+#' @return data.frame
+#' @export
+
+lscontainer <- function(base_command = "docker ps",
+                             additional = "-a"){
+  
+  if (!is.na(additional)){
+    commandline <- glue::glue("{base_command} {additional}")
+  } else {
+    commandline <- base_command
+  }
+  message(glue::glue("info:: your command is {commandline},runing..."))
+  output <- system(command = commandline,
+                   intern = TRUE)
+  header <- output[1]
+  data_lines <- output[-1]
+  data <- do.call(rbind, lapply(data_lines, function(x) {
+    strsplit(x, "\\s{2,}")[[1]]
+  }))
+  header_clean <- strsplit(header, "\\s{2,}")[[1]]
+  if (ncol(data) == length(header_clean)) {
+    colnames(data) <- header_clean
+    data <- as.data.frame(data)
+    return(data)
+  }else{
+    message("something went wrong, check your command")
+    return(NA)
+  }
+}
+
+```
+
+<!--
+Here is an example on how to use the function.
+This should be a reproducible and working example
+-->
+
+```{r examples-lscontainer}
+lscontainer(additional = "-a")
+```
+
+<!--
+Here are some unit tests to verify the function works as expected.
+-->
+
+```{r tests-lscontainer}
+test_that("lsimage works", {
+  expect_true(inherits(lscontainer, "function")) 
+})
+```
+
+# lsimage
+    
+```{r function-lsimage}
+#' Title
+#' lsimage
+#' Description
+#' list all images
+#' @return data.frame
+#' 
+#' @export
+lsimage <- function(base_command = "docker images",
+                    additional = NA){
+  
+  if (!is.na(additional)){
+    commandline <- glue::glue("{base_command} {additional}")
+  } else {
+    commandline <- base_command
+  }
+  message(glue::glue("info:: your command is {commandline},runing..."))
+  output <- system(command = commandline,
+                   intern = TRUE)
+  header <- output[1]
+  data_lines <- output[-1]
+  data <- do.call(rbind, lapply(data_lines, function(x) {
+    strsplit(x, "\\s{2,}")[[1]]
+  }))
+  header_clean <- strsplit(header, "\\s{2,}")[[1]]
+  if (ncol(data) == length(header_clean)) {
+    colnames(data) <- header_clean
+    data <- as.data.frame(data)
+    return(data)
+  }else{
+    message("something went wrong, check your command")
+    return(NA)
+  }
+}
+
+```
+  
+```{r example-lsimage}
+lsimage()
+```
+  
+```{r tests-lsimage}
+test_that("lsimage works", {
+  expect_true(inherits(lsimage, "function")) 
+})
+```
+  
+
+
+# image_rmi
+    
+```{r function-image_rmi}
+#' Title
+#' image_rmi
+#' Description
+#' remove images
+#' @return str
+#' 
+#' @export
+image_rmi <- function(id){
+    commandline <- glue::glue("docker rmi {id}")
+    message(glue::glue("info:: your command is {commandline},checking the imageids..."))
+    allimage <- lsimage()
+    if (id %in% c(allimage$REPOSITORY,allimage$`IMAGE ID`)){
+      system(commandline)
+    }else{
+      message("the imageid is not correct")
+    }
+    return(id)
+}
+```
+  
+```{r example-image_rmi}
+image_rmi("frooodle/s-pdf:latest")
+```
+  
+```{r tests-image_rmi}
+test_that("image_rmi works", {
+  expect_true(inherits(image_rmi, "function")) 
+})
+```
+  
+# image_pull
+    
+```{r function-image_pull}
+#' Title
+#' image_pull
+#' Description
+#' pull image from dockerhub
+#' @return str
+#' 
+#' @export
+image_pull <- function(id){
+  commandline <- glue::glue("docker pull {id}")
+  message(glue::glue("info:: your command is {commandline},checking the imageids..."))
+  allimage <- lsimage()
+  if (id %in% allimage$REPOSITORY){
+    message("the image already exist")
+  }else{
+    system(commandline)
+  }
+  return(id)
+}
+```
+  
+```{r example-image_pull}
+image_pull("frooodle/s-pdf:latest")
+```
+  
+```{r tests-image_pull}
+test_that("image_pull works", {
+  expect_true(inherits(image_pull, "function")) 
+})
+```
+
+# image_tag
+    
+```{r function-image_tag}
+#' Title
+#' image_tag
+#' Description
+#' change the tag of image
+#' @return str
+#' 
+#' @export
+image_tag <- function(oldtag,newtag,.keep = TRUE){
+  commandline <- glue::glue("docker tag {oldtag} {newtag}")
+  message(glue::glue("info:: your command is {commandline},checking the imageids..."))
+  allimage <- lsimage()
+  if (oldtag %in% allimage$REPOSITORY){
+    system(commandline)
+    if (.keep == FALSE){
+      image_rmi(oldtag)
+    }
+    return(newtag)
+  }else{
+    message("the oldtag does not exist")
+    return(oldtag)
+  } 
+}
+
+```
+  
+```{r example-image_tag}
+  image_tag("diygod/rsshub","fall/rsshub")
+```
+  
+```{r tests-image_tag}
+test_that("image_tag works", {
+  expect_true(inherits(image_tag, "function")) 
+})
+```
+
+# image_build
+    
+```{r function-image_build}
+#' Title
+#' image_build
+#' Description
+#' build docker image from Dockerfile
+#' @return str
+#' 
+#' @export
+image_build <- function(name,folder_dockerfile){
+  if(dir.exists(folder_dockerfile)){
+    commandline <- glue::glue("docker build -t {name} {folder_dockerfile}")
+    dockerfile <- glue::glue("{folder_dockerfile}/Dockerfile")
+    message(glue::glue("info:: your command is {commandline},checking the Dockerfile..."))
+    if (file.exists(dockerfile)){
+      system(commandline)
+      return(name)
+    } else {
+      message("Dockerfile not found")
+    }
+  }else {
+    message("the folder of Dockerfile not found")
+  }
+}
+
+```
+  
+```{r example-image_build}
+image_build("fallingstar10/gmadeomicsrocker:base","D:/fallingstarGitcode/gmadeomicsrocker/gmade_rocker-base")
+```
+  
+```{r tests-image_build}
+test_that("image_build works", {
+  expect_true(inherits(image_build, "function")) 
+})
+```
+# image_push
+    
+```{r function-image_push}
+#' Title
+#' image_push
+#' Description
+#' push image to dockerhub
+#' @return str
+#' 
+#' @export
+image_push <- function(containername,username = "example",password = "example",auther = FALSE){
+  message("info::this function will push your image to dockerhub")
+  if (auther == FALSE){
+    dockerlogin <- ""
+  } else {
+    dockerlogin <- glue::glue("docker login -u {username} -p {password}")
+  }
+  dockerpush <- glue::glue("docker push {containername}")
+  if (grepl(username,containername)){
+    if (auther == FALSE){
+      system(dockerpush)
+      } else {
+        system(dockerlogin)
+        system(dockerpush)
+        }
+    
+    return(containername)
+  }else {
+    message("conflit found in the containername and the username,please re-taging...")
+  }
+}
+```
+  
+```{r example-image_push}
+image_push("fallingstar10/gmadeomicsrocker:base",username = "fallingstar10")
+```
+  
+```{r tests-image_push}
+test_that("image_push works", {
+  expect_true(inherits(image_push, "function")) 
+})
+```
+ # image_save
+    
+```{r function-image_save}
+#' Title
+#' image_save
+#' Description
+#' save image as tarfile
+#' @return str
+#' 
+#' @export
+image_save <- function(imageid,tarfile){
+  # 先判断是不是在列表里
+  # docker save -o my_ubuntu_v3.tar runoob/ubuntu:v3
+  if (!dir.exists(dirname(tarfile))){
+    fs::dir_create(
+      dirname(tarfile)
+    )
+  }
+  commandline <- glue::glue("docker save -o {tarfile} {imageid}")
+  message(glue::glue("info:: your command is {commandline},checking the imageid..."))
+  allimage <- lsimage()
+  if (imageid %in% c(allimage$REPOSITORY,allimage$`IMAGE ID`)){
+    system(commandline)
+  }else{
+    message("the imageid is not correct")
+  }
+  return(tarfile)
+}
+```
+  
+```{r example-image_save}
+image_save("diygod/rsshub","./rsshub.tar")
+```
+  
+```{r tests-image_save}
+test_that("image_save works", {
+  expect_true(inherits(image_save, "function")) 
+})
+```
+
+# image_load
+    
+```{r function-image_load}
+#' Title
+#' image_load
+#' Description
+#' load tarfile to docker image
+#' @return str
+#' 
+#' @export
+image_load <- function(tarfile,import = FALSE,imageid = NULL){
+  #docker load --input fedora.tar
+  message(glue::glue("info:: your command is {commandline},checking the imageid..."))
+  allimage <- lsimage()
+  if (!is.null(imageid) | !(imageid %in% c(allimage$REPOSITORY,allimage$`IMAGE ID`))){
+    importvalidation = TRUE
+  } else {
+    importvalidation = FALSE
+  }
+  if (file.exists(tarfile)){
+    if (import == FALSE){
+      system(command = glue::glue("docker load --input {tarfile}"))
+      return(tarfile)
+    }else if (importvalidation){
+      system(command = glue::glue("docker import {tarfile} {imageid}"))
+      return(imageid)
+    } else {
+      message("please input a specific imageid ,which should has no confilct with existed names")
+    }
+  } else {
+    message("tarfile does not exists")
+  }
+}
+```
+  
+```{r example-image_load}
+image_load(tarfile = "./rsshub.tar",import = TRUE,imageid = "rsshub:load")
+```
+  
+```{r tests-image_load}
+test_that("image_load works", {
+  expect_true(inherits(image_load, "function")) 
+})
+```
+
+# container_run
+    
+```{r function-container_run}
+#' Title
+#' container_run
+#' Description
+#' run container at the first time
+#' @return str
+#' 
+#' @export
+container_run <- function(imageid,
+                          name,
+                          volume = NULL,
+                          ports,
+                          environmentvarible = NULL,
+                          ifD = TRUE, 
+                          restart = TRUE,
+                          run_at_once = TRUE){
+  if (run_at_once){
+    run <- "run"
+  } else {
+    run <- "create"
+  }
+  if (restart){
+    restart <- "--restart=always"
+  } else {
+    restart <- ""
+  }
+  if (ifD){
+    ifD <- "-d"
+  }else{
+    ifD <- ""
+  }
+  if (is.null(volume)){
+    volume <- ""
+  }
+  if (is.null(environmentvarible)){
+    environmentvarible <- ""
+  }
+  commandline <- glue::glue("docker {run} {ifD} {restart} --name={name} {ports} {volume} {environmentvarible} {imageid}")
+  message(glue::glue("info:: your command is {commandline},checking the imageid..."))
+  allimage <- lsimage()
+  if (imageid %in% c(allimage$REPOSITORY,allimage$`IMAGE ID`)){
+    system(commandline)
+  }else{
+    message("the imageid is not correct")
+  }
+  return(name)
+
+} 
+```
+  
+```{r example-container_run}
+container_run("diygod/rsshub","rsshubnew",ports = "-p 1300:1200")
+```
+  
+```{r tests-container_run}
+test_that("container_run works", {
+  expect_true(inherits(container_run, "function")) 
+})
+```
+# container_control
+    
+```{r function-container_control}
+#' Title
+#' container_control
+#' Description
+#' control the statue of containers by stop, start ,restart and delete(rm)
+#' @return str
+#' 
+#' @export
+container_control <- function(containerid,mod = c("stop","start","restart","rm"),
+                              forcerm = FALSE
+){
+  if (mod != "rm"){
+    commandline <- glue::glue("docker {mod} {containerid}")
+  } else if(forcerm) {
+    commandline <- glue::glue(" docker {mod} -f {containerid}")
+  } else {
+    commandline <- glue::glue(" docker {mod}  {containerid}")
+  }
+  
+  message(glue::glue("info:: your command is {commandline},checking the containerid..."))
+  allcontainer <-lscontainer()
+  if (containerid %in% c( allcontainer$NAMES,allcontainer$`CONTAINER ID`,allcontainer$PORTS)){
+    system(commandline)
+  }else{
+    message("the containerid is not correct")
+  }
+  return(containerid)
+}
+```
+  
+```{r example-container_control}
+container_control("rsshubnew","restart")
+```
+  
+```{r tests-container_control}
+test_that("container_control works", {
+  expect_true(inherits(container_control, "function")) 
+})
+```
+# container_update
+    
+```{r function-container_update}
+#' Title
+#' container_update
+#' Description
+#' update the container when the upstream image changes
+#' @return str
+#' 
+#' @export
+container_update <- function(containerid,imageid,
+                             force_rm_container = FALSE,
+                             volume = NULL,
+                             ports,
+                             environmentvarible = NULL,
+                             ifD = TRUE, 
+                             restart = TRUE,
+                             run_at_once = TRUE){
+  # stop
+  message("stop the container")
+  container_control(containerid,"stop") %>% 
+    container_control("rm",forcerm = force_rm_container )
+  # rm image
+  message("deleting the old images and pull a new one")
+  image_rmi(imageid)  %>% 
+    image_pull() 
+  # rerunimage
+  message("re-run the container")
+  container_run(imageid,
+                containerid,
+                volume,
+                ports,
+                environmentvarible,
+                ifD,
+                restart,
+                run_at_once)
+  return(containerid)
+}
+
+```
+  
+```{r example-container_update}
+container_update("rsshubnew","diygod/rsshub",ports = "-p 1300:1200",restart = FALSE)
+```
+  
+```{r tests-container_update}
+test_that("container_update works", {
+  expect_true(inherits(container_update, "function")) 
+})
+```
+
+# container_updateparameter
+    
+```{r function-container_updateparameter}
+#' Title
+#' container_updateParameter
+#' Description
+#' update the Parameter during the runing of container
+#' @return str
+#' 
+#' @export
+container_updateParameter <- function(containerid,updateParameter){
+  commandline <- glue::glue("docker container update {updateParameter} {containerid}")
+  message(glue::glue("info:: your command is {commandline},checking the containerid..."))
+  allcontainer <-lscontainer()
+  if (containerid %in% c( allcontainer$NAMES,allcontainer$`CONTAINER ID`,allcontainer$PORTS)){
+    system(commandline)
+  }else{
+    message("the containerid is not correct")
+  }
+  return(containerid)
+}
+```
+  
+```{r example-container_updateparameter}
+container_updateparameter("rsshubnew","--restart=always")
+```
+  
+```{r tests-container_updateparameter}
+test_that("container_updateparameter works", {
+  expect_true(inherits(container_updateparameter, "function")) 
+})
+```
+ # container_exec
+    
+```{r function-container_exec}
+#' Title
+#' container_exec
+#' Description
+#' run commands inside the container
+#' @return str
+#' 
+#' @export
+container_exec <- function(containerid,command){
+  # docker exec -it 9df70f9a0714 /bin/bash
+  commandline <- glue::glue("docker exec -it {containerid} /bin/bash {command} ")
+  message(glue::glue("info:: your command is {commandline},checking the containerid..."))
+  allcontainer <-lscontainer()
+  if (containerid %in% c( allcontainer$NAMES,allcontainer$`CONTAINER ID`,allcontainer$PORTS)){
+    system(commandline)
+  }else{
+    message("the containerid is not correct")
+  }
+  return(containerid)
+}
+```
+  
+```{r example-container_exec}
+container_exec("rsshubnew","pwd")
+```
+  
+```{r tests-container_exec}
+test_that("container_exec works", {
+  expect_true(inherits(container_exec, "function")) 
+})
+```
+# container_dockercompose
+    
+```{r function-container_dockercompose}
+#' Title
+#' container_dockercompose
+#' Description
+#' initial container by docker compose
+#' @return str
+#' 
+#' @export
+container_dockercompose <- function(yamlfile){
+  if (file.exists(yamlfile)){
+    system(command = glue::glue("docker-compose -f {yamlfile} up -d"))
+  } else {
+    message("yamlfile does not exist")
+  }
+  return(yamlfile)
+}
+```
+  
+```{r example-container_dockercompose}
+container_dockercompose("D:/fallingstarGitcode/compose.yaml")
+```
+  
+```{r tests-container_dockercompose}
+test_that("container_dockercompose works", {
+  expect_true(inherits(container_dockercompose, "function")) 
+})
+```
+    
+<!-- 
+# Inflate your package
+
+You're one inflate from paper to box.
+Build your package from this very Rmd using `fusen::inflate()` 
+-->
+
+
+```{r development-inflate, eval=FALSE}
+# Execute in the console directly
+fusen::inflate(flat_file = "dev/flat_first.Rmd")
+```
+
+<!-- 
+- Verify your `"DESCRIPTION"` file has been updated
+- Verify your function is in `"R/"` directory
+- Verify your test is in `"tests/testthat/"` directory
+- Verify this Rmd appears in `"vignettes/"` directory 
+-->

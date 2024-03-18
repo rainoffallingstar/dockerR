@@ -1,0 +1,17 @@
+Package: dockerR
+Version: 0.0.0.9000
+Title: DockerR
+Description: dockerR: an R package for managing docker images & containers.
+Authors@R: person(given = "Yanhua",
+       family = "Zheng",
+       role = c("aut", "cre"),
+       email = "zyh3084989256@gmail.com",
+       comment = c(ORCID = "0000-0003-1103-9579"))
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+Imports: 
+    fs,
+    glue,
+    magrittr
