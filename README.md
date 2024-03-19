@@ -1,10 +1,10 @@
 ### dockerR
 
+<img src="https://foruda.gitee.com/images/1710815823750079839/22ebe5a9_8192230.png" height="200" align="right"/>
+
 This is an R package wirtten for managing docker images and containers under R, warping most the docker cli commands.
 
 install by:
-
-<img src="https://foruda.gitee.com/images/1710815823750079839/22ebe5a9_8192230.png" height="200" align="right"/>
 
 ``` r
 pak::pak("rainoffallingstar/dockerR")
@@ -56,10 +56,9 @@ pak::pak("rainoffallingstar/dockerR")
 
 -   container_dockercompose: run/initial a container by a yaml file with docker compose
 
-    ```         
-    ```
-
 #### RoadMap
+
+<img src="https://github.com/rainoffallingstar/dockerR/blob/master/dev/logo_ny.png" height="200" align="right"/>
 
 -   clean the code (a bit mass now but runs well ,lol)
 
