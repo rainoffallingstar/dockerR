@@ -1,10 +1,14 @@
 ### dockerR
 
+
+
 This is an R package wirtten for managing docker images and containers under R, warping most the docker cli commands.
 
 install by:
 
-``` R
+<img src="https://gitee.com/rainoffallingstar/rainoffallingstar/blob/mydraft/_imgbed/logo_ny.png" height="200" align="right"/>
+
+``` r
 pak::pak("rainoffallingstar/dockerR")
 ```
 
