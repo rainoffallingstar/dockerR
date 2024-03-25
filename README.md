@@ -14,7 +14,7 @@ pak::pak("rainoffallingstar/dockerR")
 
 -   docker
 -   docker compose
--   podman(not support yet)
+-   podman(support by parameter {"use_podman = TRUE"})
 
 #### Feature
 
@@ -55,6 +55,9 @@ pak::pak("rainoffallingstar/dockerR")
 -   container_exec : run commands inside the container
 
 -   container_dockercompose: run/initial a container by a yaml file with docker compose
+-   docker_info: show docker info
+-   docker_version : show docker version
+-   docker_stats: show container stats under running
 
 #### RoadMap
 
@@ -64,5 +67,3 @@ pak::pak("rainoffallingstar/dockerR")
 -   better test examples
 
 -   more features with the docker cli commands
-
--   support for podman
