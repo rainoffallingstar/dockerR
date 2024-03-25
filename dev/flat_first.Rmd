@@ -41,7 +41,7 @@ fusen::fill_description(
 # Define License with use_*_license()
 usethis::use_mit_license("YanhuaZheng")
 
-fusen::
+#usethis::use_version("0.1.0","0.1.0.1")
 # use packages
 
 usethis::use_pipe()
