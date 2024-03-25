@@ -8,6 +8,7 @@
 #' @param containerid the label of container
 #' @param mod the control mod,including stop, start ,restart and delete(rm)
 #' @param forcerm force remove the container if its true
+#' @param use_podman logit, use podman as  backend when it is TRUE
 #' @return str
 #' 
 #' @export
@@ -15,7 +16,7 @@
 #' container_control("rsshubnew","restart")
 container_control <- function(containerid,mod = c("stop","start","restart","rm"),
                               forcerm = FALSE
-){
+, use_podman = FALSE){
   if (mod != "rm"){
     commandline <- glue::glue("docker {mod} {containerid}")
   } else if(forcerm) {
@@ -23,9 +24,11 @@ container_control <- function(containerid,mod = c("stop","start","restart","rm")
   } else {
     commandline <- glue::glue(" docker {mod}  {containerid}")
   }
-  
+  if (use_podman) {
+    commandline = stringr::str_replace(commandline,"docker","podman")
+  }
   message(glue::glue("info\\ your command is {commandline},checking the containerid..."))
-  allcontainer <-lscontainer()
+  allcontainer <-lscontainer(use_podman = use_podman)
   if (containerid %in% c( allcontainer$NAMES,allcontainer$`CONTAINER ID`,allcontainer$PORTS)){
     system(commandline)
   }else{

@@ -4,7 +4,10 @@
 \alias{docker_version}
 \title{docker information}
 \usage{
-docker_version()
+docker_version(use_podman = FALSE)
+}
+\arguments{
+\item{use_podman}{logit, use podman as  backend when it is TRUE}
 }
 \value{
 str

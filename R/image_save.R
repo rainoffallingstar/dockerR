@@ -6,12 +6,13 @@
 #' save image as tarfile
 #' @param imageid the image label 
 #' @param tarfile the dest output tarfile,with a full dir and its name
+#' @param use_podman logit, use podman as  backend when it is TRUE
 #' @return str
 #' 
 #' @export
 #' @examples
 #' image_save("diygod/rsshub","./rsshub.tar")
-image_save <- function(imageid,tarfile){
+image_save <- function(imageid,tarfile, use_podman = FALSE){
   # 先判断是不是在列表里
   # docker save -o my_ubuntu_v3.tar runoob/ubuntu:v3
   if (!dir.exists(dirname(tarfile))){
@@ -20,8 +21,11 @@ image_save <- function(imageid,tarfile){
     )
   }
   commandline <- glue::glue("docker save -o {tarfile} {imageid}")
+  if (use_podman) {
+    commandline = stringr::str_replace(commandline,"docker","podman")
+  }
   message(glue::glue("info\\ your command is {commandline},checking the imageid..."))
-  allimage <- lsimage()
+  allimage <- lsimage(use_podman = use_podman)
   if (imageid %in% c(allimage$REPOSITORY,allimage$`IMAGE ID`)){
     system(commandline)
   }else{

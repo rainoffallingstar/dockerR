@@ -10,7 +10,8 @@ License: MIT + file LICENSE
 Imports: 
     fs,
     glue,
-    magrittr
+    magrittr,
+    stringr
 Suggests: 
     knitr,
     rmarkdown,

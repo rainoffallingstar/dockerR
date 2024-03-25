@@ -4,12 +4,18 @@
 \alias{docker_stats}
 \title{container stats}
 \usage{
-docker_stats(base_command = "docker stats --no-stream", additional = NA)
+docker_stats(
+  base_command = "docker stats --no-stream",
+  additional = NA,
+  use_podman = FALSE
+)
 }
 \arguments{
 \item{base_command}{the base command}
 
 \item{additional}{additional command}
+
+\item{use_podman}{logit, use podman as  backend when it is TRUE}
 }
 \value{
 data.frame

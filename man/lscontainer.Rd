@@ -4,12 +4,14 @@
 \alias{lscontainer}
 \title{Add one to any value}
 \usage{
-lscontainer(base_command = "docker ps", additional = "-a")
+lscontainer(base_command = "docker ps", additional = "-a", use_podman = FALSE)
 }
 \arguments{
 \item{base_command}{A str}
 
 \item{additional}{A str}
+
+\item{use_podman}{logit, use podman as  backend when it is TRUE}
 }
 \value{
 data.frame

@@ -15,7 +15,8 @@ container_run(
   environmentvarible = NULL,
   ifD = TRUE,
   restart = TRUE,
-  run_at_once = TRUE
+  run_at_once = TRUE,
+  use_podman = FALSE
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ container_run(
 \item{restart}{the "--restart=always" option}
 
 \item{run_at_once}{whether using "create" or "run"}
+
+\item{use_podman}{logit, use podman as  backend when it is TRUE}
 }
 \value{
 str

@@ -5,6 +5,7 @@
 #' Description
 #' initial container by docker compose
 #' @param yamlfile the docker compose yaml file 
+#' @param use_podman logit, use podman as  backend when it is TRUE
 #'
 #' 
 #' @return str
@@ -12,9 +13,14 @@
 #' @export
 #' @examples
 #' container_dockercompose("./dev/nextcloud_compose.yaml")
-container_dockercompose <- function(yamlfile){
+container_dockercompose <- function(yamlfile, use_podman = FALSE){
   if (file.exists(yamlfile)){
-    system(command = glue::glue("docker-compose -f {yamlfile} up -d"))
+    if (use_podman){
+      commandline = glue::glue("podman-compose -f {yamlfile} up -d")
+    } else {
+      commandline = glue::glue("docker-compose -f {yamlfile} up -d")
+    }
+    system(command = commandline)
   } else {
     message("yamlfile does not exist")
   }

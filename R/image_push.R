@@ -8,19 +8,26 @@
 #' @param username the username of dockerhub account
 #' @param password the password of dockerhub account
 #' @param auther if the a dockerhub account has previously login,then auther should be FALSE
+#' @param use_podman logit, use podman as  backend when it is TRUE
 #' @return str
 #' 
 #' @export
 #' @examples
 #' image_push("fallingstar10/gmadeomicsrocker:base",username = "fallingstar10")
-image_push <- function(containername,username = "example",password = "example",auther = FALSE){
+image_push <- function(containername,username = "example",password = "example",auther = FALSE, use_podman = FALSE){
   message("info\\this function will push your image to dockerhub")
   if (auther == FALSE){
     dockerlogin <- ""
   } else {
     dockerlogin <- glue::glue("docker login -u {username} -p {password}")
+    if (use_podman) {
+    dockerlogin = stringr::str_replace(dockerlogin,"docker","podman")
+  }
   }
   dockerpush <- glue::glue("docker push {containername}")
+  if (use_podman) {
+    dockerpush = stringr::str_replace(dockerpush,"docker","podman")
+  }
   if (grepl(username,containername)){
     if (auther == FALSE){
       system(dockerpush)

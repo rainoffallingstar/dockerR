@@ -5,15 +5,19 @@
 #' Description
 #' remove images
 #' @param id the image id ,str 
+#' @param use_podman logit, use podman as  backend when it is TRUE
 #' @return str
 #' 
 #' @export
 #' @examples
 #' image_rmi("frooodle/s-pdf:latest")
-image_rmi <- function(id){
+image_rmi <- function(id, use_podman = FALSE){
     commandline <- glue::glue("docker rmi {id}")
+    if (use_podman) {
+    commandline = stringr::str_replace(commandline,"docker","podman")
+  }
     message(glue::glue("info\\ your command is {commandline},checking the imageids..."))
-    allimage <- lsimage()
+    allimage <- lsimage(use_podman = use_podman)
     if (id %in% c(allimage$REPOSITORY,allimage$`IMAGE ID`)){
       system(commandline)
     }else{

@@ -7,12 +7,14 @@ container_exec
 Description
 run commands inside the container}
 \usage{
-container_exec(containerid, command)
+container_exec(containerid, command, use_podman = FALSE)
 }
 \arguments{
 \item{containerid}{the name of the container}
 
 \item{command}{commands need to be run inside the container}
+
+\item{use_podman}{logit, use podman as  backend when it is TRUE}
 }
 \value{
 str

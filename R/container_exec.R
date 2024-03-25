@@ -7,17 +7,21 @@
 #' 
 #' @param containerid the name of the container
 #' @param command commands need to be run inside the container
+#' @param use_podman logit, use podman as  backend when it is TRUE
 #' 
 #' @return str
 #' 
 #' @export
 #' @examples
 #' container_exec("rsshubnew","pwd")
-container_exec <- function(containerid,command){
+container_exec <- function(containerid,command, use_podman = FALSE){
   # docker exec -it 9df70f9a0714 /bin/bash
   commandline <- glue::glue("docker exec -it {containerid} /bin/bash {command} ")
+  if (use_podman) {
+    commandline = stringr::str_replace(commandline,"docker","podman")
+  }
   message(glue::glue("info\\ your command is {commandline},checking the containerid..."))
-  allcontainer <-lscontainer()
+  allcontainer <-lscontainer(use_podman = use_podman)
   if (containerid %in% c( allcontainer$NAMES,allcontainer$`CONTAINER ID`,allcontainer$PORTS)){
     system(commandline)
   }else{

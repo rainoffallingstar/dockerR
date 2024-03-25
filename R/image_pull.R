@@ -6,15 +6,19 @@
 #' pull image from dockerhub
 #' 
 #' @param id the image id ,str
+#' @param use_podman logit, use podman as  backend when it is TRUE
 #' @return str
 #' 
 #' @export
 #' @examples
 #' image_pull("frooodle/s-pdf:latest")
-image_pull <- function(id){
+image_pull <- function(id, use_podman = FALSE){
   commandline <- glue::glue("docker pull {id}")
+  if (use_podman) {
+    commandline = stringr::str_replace(commandline,"docker","podman")
+  }
   message(glue::glue("info\\ your command is {commandline},checking the imageids..."))
-  allimage <- lsimage()
+  allimage <- lsimage(use_podman = use_podman)
   if (id %in% allimage$REPOSITORY){
     message("the image already exist")
   }else{

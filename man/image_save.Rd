@@ -7,12 +7,14 @@ image_save
 Description
 save image as tarfile}
 \usage{
-image_save(imageid, tarfile)
+image_save(imageid, tarfile, use_podman = FALSE)
 }
 \arguments{
 \item{imageid}{the image label}
 
 \item{tarfile}{the dest output tarfile,with a full dir and its name}
+
+\item{use_podman}{logit, use podman as  backend when it is TRUE}
 }
 \value{
 str

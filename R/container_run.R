@@ -12,6 +12,7 @@
 #' @param ifD the "-d" option of docker
 #' @param restart the "--restart=always" option
 #' @param run_at_once whether using "create" or "run"
+#' @param use_podman logit, use podman as  backend when it is TRUE
 #' @return str
 #' 
 #' @export
@@ -24,7 +25,7 @@ container_run <- function(imageid,
                           environmentvarible = NULL,
                           ifD = TRUE, 
                           restart = TRUE,
-                          run_at_once = TRUE){
+                          run_at_once = TRUE, use_podman = FALSE){
   if (run_at_once){
     run <- "run"
   } else {
@@ -47,8 +48,11 @@ container_run <- function(imageid,
     environmentvarible <- ""
   }
   commandline <- glue::glue("docker {run} {ifD} {restart} --name={name} {ports} {volume} {environmentvarible} {imageid}")
+  if (use_podman) {
+    commandline = stringr::str_replace(commandline,"docker","podman")
+  }
   message(glue::glue("info\\ your command is {commandline},checking the imageid..."))
-  allimage <- lsimage()
+  allimage <- lsimage(use_podman = use_podman)
   if (imageid %in% c(allimage$REPOSITORY,allimage$`IMAGE ID`)){
     system(commandline)
   }else{

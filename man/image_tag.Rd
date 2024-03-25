@@ -7,7 +7,7 @@ image_tag
 Description
 change the tag of image}
 \usage{
-image_tag(oldtag, newtag, .keep = TRUE)
+image_tag(oldtag, newtag, .keep = TRUE, use_podman = FALSE)
 }
 \arguments{
 \item{oldtag}{the old/original image label,str}
@@ -15,6 +15,8 @@ image_tag(oldtag, newtag, .keep = TRUE)
 \item{newtag}{the new image label,str}
 
 \item{.keep}{whether to keep the oldtag image}
+
+\item{use_podman}{logit, use podman as  backend when it is TRUE}
 }
 \value{
 str

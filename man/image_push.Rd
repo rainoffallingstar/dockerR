@@ -11,7 +11,8 @@ image_push(
   containername,
   username = "example",
   password = "example",
-  auther = FALSE
+  auther = FALSE,
+  use_podman = FALSE
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ image_push(
 \item{password}{the password of dockerhub account}
 
 \item{auther}{if the a dockerhub account has previously login,then auther should be FALSE}
+
+\item{use_podman}{logit, use podman as  backend when it is TRUE}
 }
 \value{
 str

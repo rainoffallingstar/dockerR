@@ -4,6 +4,7 @@
 #' 
 #' @param base_command A str
 #' @param additional A str
+#' @param use_podman logit, use podman as  backend when it is TRUE
 #'
 #' @return data.frame
 #' @export
@@ -11,12 +12,16 @@
 #' lscontainer(additional = "-a")
 
 lscontainer <- function(base_command = "docker ps",
-                             additional = "-a"){
+                             additional = "-a", use_podman = FALSE){
   
   if (!is.na(additional)){
     commandline <- glue::glue("{base_command} {additional}")
   } else {
     commandline <- base_command
+  }
+  
+  if (use_podman) {
+    commandline = stringr::str_replace(commandline,"docker","podman")
   }
   message(glue::glue("info\\ your command is {commandline},runing..."))
   output <- system(command = commandline,

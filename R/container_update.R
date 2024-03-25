@@ -13,6 +13,7 @@
 #' @param ifD the "-d" option of docker
 #' @param restart the "--restart=always" option
 #' @param run_at_once whether using "create" or "run"
+#' @param use_podman logit, use podman as  backend when it is TRUE
 #' 
 #' @return str
 #' 
@@ -26,15 +27,16 @@ container_update <- function(containerid,imageid,
                              environmentvarible = NULL,
                              ifD = TRUE, 
                              restart = TRUE,
-                             run_at_once = TRUE){
+                             run_at_once = TRUE,
+                             use_podman = FALSE){
   # stop
   message("stop the container")
-  container_control(containerid,"stop") %>% 
-    container_control("rm",forcerm = force_rm_container )
+  container_control(containerid,"stop",use_podman = use_podman) %>% 
+    container_control("rm",forcerm = force_rm_container ,use_podman = use_podman)
   # rm image
   message("deleting the old images and pull a new one")
-  image_rmi(imageid)  %>% 
-    image_pull() 
+  image_rmi(imageid,use_podman = use_podman)  %>% 
+    image_pull(use_podman = use_podman) 
   # rerunimage
   message("re-run the container")
   container_run(imageid,
@@ -44,7 +46,8 @@ container_update <- function(containerid,imageid,
                 environmentvarible,
                 ifD,
                 restart,
-                run_at_once)
+                run_at_once,
+                use_podman = use_podman)
   return(containerid)
 }
 

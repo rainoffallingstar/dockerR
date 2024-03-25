@@ -7,12 +7,14 @@ lsimage
 Description
 list all images}
 \usage{
-lsimage(base_command = "docker images", additional = NA)
+lsimage(base_command = "docker images", additional = NA, use_podman = FALSE)
 }
 \arguments{
 \item{base_command}{the base command}
 
 \item{additional}{additional command}
+
+\item{use_podman}{logit, use podman as  backend when it is TRUE}
 }
 \value{
 data.frame

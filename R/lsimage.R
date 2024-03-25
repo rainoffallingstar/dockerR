@@ -6,18 +6,22 @@
 #' list all images
 #' @param base_command the base command 
 #' @param additional additional command
+#' @param use_podman logit, use podman as  backend when it is TRUE
 #' @return data.frame
 #' 
 #' @export
 #' @examples
 #' lsimage()
 lsimage <- function(base_command = "docker images",
-                    additional = NA){
+                    additional = NA, use_podman = FALSE){
   
   if (!is.na(additional)){
     commandline <- glue::glue("{base_command} {additional}")
   } else {
     commandline <- base_command
+  }
+  if (use_podman) {
+    commandline = stringr::str_replace(commandline,"docker","podman")
   }
   message(glue::glue("info\\ your command is {commandline},runing..."))
   output <- system(command = commandline,

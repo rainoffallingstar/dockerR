@@ -7,10 +7,12 @@ container_dockercompose
 Description
 initial container by docker compose}
 \usage{
-container_dockercompose(yamlfile)
+container_dockercompose(yamlfile, use_podman = FALSE)
 }
 \arguments{
 \item{yamlfile}{the docker compose yaml file}
+
+\item{use_podman}{logit, use podman as  backend when it is TRUE}
 }
 \value{
 str

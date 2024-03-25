@@ -4,11 +4,16 @@
 #' 
 #' display the information of the installed docker
 #' 
+#' @param use_podman logit, use podman as  backend when it is TRUE
 #' @return str
 #' 
 #' @export
 #' @examples
 #' docker_version()
-docker_version <- function(){
+docker_version <- function(use_podman = FALSE){
+    if (use_podman) {
+     system("podman version")
+  }else {
     system("docker version")
+  }  
 }

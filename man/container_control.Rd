@@ -10,7 +10,8 @@ control the statue of containers by stop, start ,restart and delete(rm)}
 container_control(
   containerid,
   mod = c("stop", "start", "restart", "rm"),
-  forcerm = FALSE
+  forcerm = FALSE,
+  use_podman = FALSE
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ container_control(
 \item{mod}{the control mod,including stop, start ,restart and delete(rm)}
 
 \item{forcerm}{force remove the container if its true}
+
+\item{use_podman}{logit, use podman as  backend when it is TRUE}
 }
 \value{
 str

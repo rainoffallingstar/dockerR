@@ -239,7 +239,7 @@ image_rmi <- function(id, use_podman = FALSE){
     commandline = stringr::str_replace(commandline,"docker","podman")
   }
     message(glue::glue("info\\ your command is {commandline},checking the imageids..."))
-    allimage <- lsimage()
+    allimage <- lsimage(use_podman = use_podman)
     if (id %in% c(allimage$REPOSITORY,allimage$`IMAGE ID`)){
       system(commandline)
     }else{
@@ -278,7 +278,7 @@ image_pull <- function(id, use_podman = FALSE){
     commandline = stringr::str_replace(commandline,"docker","podman")
   }
   message(glue::glue("info\\ your command is {commandline},checking the imageids..."))
-  allimage <- lsimage()
+  allimage <- lsimage(use_podman = use_podman)
   if (id %in% allimage$REPOSITORY){
     message("the image already exist")
   }else{
@@ -318,7 +318,7 @@ image_tag <- function(oldtag,newtag,.keep = TRUE, use_podman = FALSE){
     commandline = stringr::str_replace(commandline,"docker","podman")
   }
   message(glue::glue("info\\ your command is {commandline},checking the imageids..."))
-  allimage <- lsimage()
+  allimage <- lsimage(use_podman = use_podman)
   if (oldtag %in% allimage$REPOSITORY){
     system(commandline)
     if (.keep == FALSE){
@@ -466,7 +466,7 @@ image_save <- function(imageid,tarfile, use_podman = FALSE){
     commandline = stringr::str_replace(commandline,"docker","podman")
   }
   message(glue::glue("info\\ your command is {commandline},checking the imageid..."))
-  allimage <- lsimage()
+  allimage <- lsimage(use_podman = use_podman)
   if (imageid %in% c(allimage$REPOSITORY,allimage$`IMAGE ID`)){
     system(commandline)
   }else{
@@ -503,7 +503,7 @@ test_that("image_save works", {
 #' @export
 image_load <- function(tarfile,import = FALSE,imageid = NULL, use_podman = FALSE){
   #docker load --input fedora.tar
-  allimage <- lsimage()
+  allimage <- lsimage(use_podman = use_podman)
   if (!is.null(imageid) | !(imageid %in% c(allimage$REPOSITORY,allimage$`IMAGE ID`))){
     importvalidation = TRUE
   } else {
@@ -588,7 +588,7 @@ container_run <- function(imageid,
     commandline = stringr::str_replace(commandline,"docker","podman")
   }
   message(glue::glue("info\\ your command is {commandline},checking the imageid..."))
-  allimage <- lsimage()
+  allimage <- lsimage(use_podman = use_podman)
   if (imageid %in% c(allimage$REPOSITORY,allimage$`IMAGE ID`)){
     system(commandline)
   }else{
@@ -637,7 +637,7 @@ container_control <- function(containerid,mod = c("stop","start","restart","rm")
     commandline = stringr::str_replace(commandline,"docker","podman")
   }
   message(glue::glue("info\\ your command is {commandline},checking the containerid..."))
-  allcontainer <-lscontainer()
+  allcontainer <-lscontainer(use_podman = use_podman)
   if (containerid %in% c( allcontainer$NAMES,allcontainer$`CONTAINER ID`,allcontainer$PORTS)){
     system(commandline)
   }else{
@@ -684,15 +684,16 @@ container_update <- function(containerid,imageid,
                              environmentvarible = NULL,
                              ifD = TRUE, 
                              restart = TRUE,
-                             run_at_once = TRUE){
+                             run_at_once = TRUE,
+                             use_podman = FALSE){
   # stop
   message("stop the container")
-  container_control(containerid,"stop") %>% 
-    container_control("rm",forcerm = force_rm_container )
+  container_control(containerid,"stop",use_podman = use_podman) %>% 
+    container_control("rm",forcerm = force_rm_container ,use_podman = use_podman)
   # rm image
   message("deleting the old images and pull a new one")
-  image_rmi(imageid)  %>% 
-    image_pull() 
+  image_rmi(imageid,use_podman = use_podman)  %>% 
+    image_pull(use_podman = use_podman) 
   # rerunimage
   message("re-run the container")
   container_run(imageid,
@@ -702,7 +703,8 @@ container_update <- function(containerid,imageid,
                 environmentvarible,
                 ifD,
                 restart,
-                run_at_once)
+                run_at_once,
+                use_podman = use_podman)
   return(containerid)
 }
 
@@ -727,15 +729,12 @@ test_that("container_update works", {
 #' update the Parameter during the runing of container
 #' @param containerid the name of the container
 #' @param updateParameter new parameter used to update the container
-#' @param use_podman logit, use podman as  backend when it is TRUE
+#' 
 #' @return str
 #' 
 #' @export
-container_updateParameter <- function(containerid,updateParameter, use_podman = FALSE){
+container_updateParameter <- function(containerid,updateParameter){
   commandline <- glue::glue("docker container update {updateParameter} {containerid}")
-  if (use_podman) {
-    commandline = stringr::str_replace(commandline,"docker","podman")
-  }
   message(glue::glue("info\\ your command is {commandline},checking the containerid..."))
   allcontainer <-lscontainer()
   if (containerid %in% c( allcontainer$NAMES,allcontainer$`CONTAINER ID`,allcontainer$PORTS)){
@@ -779,7 +778,7 @@ container_exec <- function(containerid,command, use_podman = FALSE){
     commandline = stringr::str_replace(commandline,"docker","podman")
   }
   message(glue::glue("info\\ your command is {commandline},checking the containerid..."))
-  allcontainer <-lscontainer()
+  allcontainer <-lscontainer(use_podman = use_podman)
   if (containerid %in% c( allcontainer$NAMES,allcontainer$`CONTAINER ID`,allcontainer$PORTS)){
     system(commandline)
   }else{
@@ -814,7 +813,12 @@ test_that("container_exec works", {
 #' @export
 container_dockercompose <- function(yamlfile, use_podman = FALSE){
   if (file.exists(yamlfile)){
-    system(command = glue::glue("docker-compose -f {yamlfile} up -d"))
+    if (use_podman){
+      commandline = glue::glue("podman-compose -f {yamlfile} up -d")
+    } else {
+      commandline = glue::glue("docker-compose -f {yamlfile} up -d")
+    }
+    system(command = commandline)
   } else {
     message("yamlfile does not exist")
   }

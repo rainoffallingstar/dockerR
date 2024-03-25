@@ -7,7 +7,7 @@ image_load
 Description
 load tarfile to docker image}
 \usage{
-image_load(tarfile, import = FALSE, imageid = NULL)
+image_load(tarfile, import = FALSE, imageid = NULL, use_podman = FALSE)
 }
 \arguments{
 \item{tarfile}{the dest output tarfile,with a full dir and its name}
@@ -15,6 +15,8 @@ image_load(tarfile, import = FALSE, imageid = NULL)
 \item{import}{not using "load" command when its true}
 
 \item{imageid}{the image label}
+
+\item{use_podman}{logit, use podman as  backend when it is TRUE}
 }
 \value{
 str

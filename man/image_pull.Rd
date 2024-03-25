@@ -7,10 +7,12 @@ image_pull
 Description
 pull image from dockerhub}
 \usage{
-image_pull(id)
+image_pull(id, use_podman = FALSE)
 }
 \arguments{
 \item{id}{the image id ,str}
+
+\item{use_podman}{logit, use podman as  backend when it is TRUE}
 }
 \value{
 str

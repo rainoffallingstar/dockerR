@@ -7,15 +7,16 @@
 #' @param tarfile the dest output tarfile,with a full dir and its name
 #' @param import not using "load" command when its true
 #' @param imageid the image label 
+#' @param use_podman logit, use podman as  backend when it is TRUE
 #' 
 #' @return str
 #' 
 #' @export
 #' @examples
 #' image_load(tarfile = "./dev/rsshub.tar",import = TRUE,imageid = "rsshub:load")
-image_load <- function(tarfile,import = FALSE,imageid = NULL){
+image_load <- function(tarfile,import = FALSE,imageid = NULL, use_podman = FALSE){
   #docker load --input fedora.tar
-  allimage <- lsimage()
+  allimage <- lsimage(use_podman = use_podman)
   if (!is.null(imageid) | !(imageid %in% c(allimage$REPOSITORY,allimage$`IMAGE ID`))){
     importvalidation = TRUE
   } else {

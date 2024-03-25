@@ -7,12 +7,14 @@ image_build
 Description
 build docker image from Dockerfile}
 \usage{
-image_build(name, folder_dockerfile)
+image_build(name, folder_dockerfile, use_podman = FALSE)
 }
 \arguments{
 \item{name}{the label of the built image}
 
 \item{folder_dockerfile}{the dir where the dockerfile lies in}
+
+\item{use_podman}{logit, use podman as  backend when it is TRUE}
 }
 \value{
 str

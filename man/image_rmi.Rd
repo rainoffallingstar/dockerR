@@ -7,10 +7,12 @@ image_rmi
 Description
 remove images}
 \usage{
-image_rmi(id)
+image_rmi(id, use_podman = FALSE)
 }
 \arguments{
 \item{id}{the image id ,str}
+
+\item{use_podman}{logit, use podman as  backend when it is TRUE}
 }
 \value{
 str
