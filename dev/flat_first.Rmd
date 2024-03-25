@@ -28,9 +28,11 @@ Note: when you will use other flat templates, this part will be in a separate fi
 # Describe your package
 fusen::fill_description(
   pkg = here::here(),
+  overwrite = TRUE,
   fields = list(
     Title = "dockerR",
     Description = "dockerR: an R package for managing docker images & containers.",
+    version = "0.1.0",
     `Authors@R` = c(
       person("Yanhua", "Zheng", email = "zyh3084989256@gmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-1103-9579"))
     )
@@ -39,7 +41,7 @@ fusen::fill_description(
 # Define License with use_*_license()
 usethis::use_mit_license("YanhuaZheng")
 
-
+fusen::
 # use packages
 
 usethis::use_pipe()
