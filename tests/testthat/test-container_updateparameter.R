@@ -3,7 +3,3 @@
 test_that("container_updateparameter works", {
   expect_true(inherits(container_updateParameter, "function")) 
 })
-
-test_that("container_exec works", {
-  expect_true(inherits(container_exec, "function")) 
-})

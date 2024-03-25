@@ -4,31 +4,41 @@ flat_first.Rmd:
   R:
   - R/container_control.R
   - R/container_dockercompose.R
-  - R/container_updateparameter.R
+  - R/container_exec.R
   - R/container_run.R
   - R/container_update.R
+  - R/container_updateparameter.R
+  - R/docker_info.R
+  - R/docker_stats.R
+  - R/docker_version.R
   - R/image_build.R
   - R/image_load.R
   - R/image_pull.R
   - R/image_push.R
   - R/image_rmi.R
+  - R/image_save.R
   - R/image_tag.R
   - R/lscontainer.R
   - R/lsimage.R
   tests:
   - tests/testthat/test-lscontainer.R
   - tests/testthat/test-lsimage.R
+  - tests/testthat/test-docker_stats.R
   - tests/testthat/test-image_rmi.R
   - tests/testthat/test-image_pull.R
   - tests/testthat/test-image_tag.R
   - tests/testthat/test-image_build.R
   - tests/testthat/test-image_push.R
+  - tests/testthat/test-image_save.R
   - tests/testthat/test-image_load.R
   - tests/testthat/test-container_run.R
   - tests/testthat/test-container_control.R
   - tests/testthat/test-container_update.R
   - tests/testthat/test-container_updateparameter.R
+  - tests/testthat/test-container_exec.R
   - tests/testthat/test-container_dockercompose.R
+  - tests/testthat/test-docker_info.R
+  - tests/testthat/test-docker_version.R
   vignettes: vignettes/get-started.Rmd
   inflate:
     flat_file: dev/flat_first.Rmd

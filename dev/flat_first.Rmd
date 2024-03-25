@@ -55,17 +55,22 @@ usethis::use_package("glue")
 #' 
 #' @param base_command A str
 #' @param additional A str
+#' @param use_podman logit, use podman as  backend when it is TRUE
 #'
 #' @return data.frame
 #' @export
 
 lscontainer <- function(base_command = "docker ps",
-                             additional = "-a"){
+                             additional = "-a", use_podman = FALSE){
   
   if (!is.na(additional)){
     commandline <- glue::glue("{base_command} {additional}")
   } else {
     commandline <- base_command
+  }
+  
+  if (use_podman) {
+    commandline = stringr::str_replace(commandline,"docker","podman")
   }
   message(glue::glue("info\\ your command is {commandline},runing..."))
   output <- system(command = commandline,
@@ -116,16 +121,20 @@ test_that("lsimage works", {
 #' list all images
 #' @param base_command the base command 
 #' @param additional additional command
+#' @param use_podman logit, use podman as  backend when it is TRUE
 #' @return data.frame
 #' 
 #' @export
 lsimage <- function(base_command = "docker images",
-                    additional = NA){
+                    additional = NA, use_podman = FALSE){
   
   if (!is.na(additional)){
     commandline <- glue::glue("{base_command} {additional}")
   } else {
     commandline <- base_command
+  }
+  if (use_podman) {
+    commandline = stringr::str_replace(commandline,"docker","podman")
   }
   message(glue::glue("info\\ your command is {commandline},runing..."))
   output <- system(command = commandline,
@@ -158,7 +167,59 @@ test_that("lsimage works", {
 })
 ```
   
-
+# docker_stats
+    
+```{r function-docker_stats}
+#' container stats
+#' 
+#' show the container stats in a data.frame
+#' @param base_command the base command 
+#' @param additional additional command
+#' @param use_podman logit, use podman as  backend when it is TRUE
+#' @return data.frame
+#' 
+#' @export
+docker_stats <- function(base_command = "docker stats --no-stream",
+                    additional = NA, use_podman = FALSE){
+  
+  if (!is.na(additional)){
+    commandline <- glue::glue("{base_command} {additional}")
+  } else {
+    commandline <- base_command
+  }
+  if (use_podman) {
+    commandline = stringr::str_replace(commandline,"docker","podman")
+  }
+  message(glue::glue("info\\ your command is {commandline},runing..."))
+  output <- system(command = commandline,
+                   intern = TRUE)
+  header <- output[1]
+  data_lines <- output[-1]
+  data <- do.call(rbind, lapply(data_lines, function(x) {
+    strsplit(x, "\\s{2,}")[[1]]
+  }))
+  header_clean <- strsplit(header, "\\s{2,}")[[1]]
+  if (ncol(data) == length(header_clean)) {
+    colnames(data) <- header_clean
+    data <- as.data.frame(data)
+    return(data)
+  }else{
+    message("something went wrong, check your command")
+    return(NA)
+  }
+}
+```
+  
+```{r example-docker_stats}
+docker_stats()
+```
+  
+```{r tests-docker_stats}
+test_that("docker_stats works", {
+  expect_true(inherits(docker_stats, "function")) 
+})
+```
+  
 
 # image_rmi
     
@@ -168,11 +229,15 @@ test_that("lsimage works", {
 #' Description
 #' remove images
 #' @param id the image id ,str 
+#' @param use_podman logit, use podman as  backend when it is TRUE
 #' @return str
 #' 
 #' @export
-image_rmi <- function(id){
+image_rmi <- function(id, use_podman = FALSE){
     commandline <- glue::glue("docker rmi {id}")
+    if (use_podman) {
+    commandline = stringr::str_replace(commandline,"docker","podman")
+  }
     message(glue::glue("info\\ your command is {commandline},checking the imageids..."))
     allimage <- lsimage()
     if (id %in% c(allimage$REPOSITORY,allimage$`IMAGE ID`)){
@@ -203,11 +268,15 @@ test_that("image_rmi works", {
 #' pull image from dockerhub
 #' 
 #' @param id the image id ,str
+#' @param use_podman logit, use podman as  backend when it is TRUE
 #' @return str
 #' 
 #' @export
-image_pull <- function(id){
+image_pull <- function(id, use_podman = FALSE){
   commandline <- glue::glue("docker pull {id}")
+  if (use_podman) {
+    commandline = stringr::str_replace(commandline,"docker","podman")
+  }
   message(glue::glue("info\\ your command is {commandline},checking the imageids..."))
   allimage <- lsimage()
   if (id %in% allimage$REPOSITORY){
@@ -239,11 +308,15 @@ test_that("image_pull works", {
 #' @param oldtag the old/original image label,str
 #' @param newtag the new image label,str
 #' @param .keep whether to keep the oldtag image
+#' @param use_podman logit, use podman as  backend when it is TRUE
 #' @return str
 #' 
 #' @export
-image_tag <- function(oldtag,newtag,.keep = TRUE){
+image_tag <- function(oldtag,newtag,.keep = TRUE, use_podman = FALSE){
   commandline <- glue::glue("docker tag {oldtag} {newtag}")
+  if (use_podman) {
+    commandline = stringr::str_replace(commandline,"docker","podman")
+  }
   message(glue::glue("info\\ your command is {commandline},checking the imageids..."))
   allimage <- lsimage()
   if (oldtag %in% allimage$REPOSITORY){
@@ -279,12 +352,16 @@ test_that("image_tag works", {
 #' build docker image from Dockerfile
 #' @param name the label of the built image
 #' @param folder_dockerfile the dir where the dockerfile lies in 
+#' @param use_podman logit, use podman as  backend when it is TRUE
 #' @return str
 #' 
 #' @export
-image_build <- function(name,folder_dockerfile){
+image_build <- function(name,folder_dockerfile, use_podman = FALSE){
   if(dir.exists(folder_dockerfile)){
     commandline <- glue::glue("docker build -t {name} {folder_dockerfile}")
+    if (use_podman) {
+    commandline = stringr::str_replace(commandline,"docker","podman")
+  }
     dockerfile <- glue::glue("{folder_dockerfile}/Dockerfile")
     message(glue::glue("info\\ your command is {commandline},checking the Dockerfile..."))
     if (file.exists(dockerfile)){
@@ -320,17 +397,24 @@ test_that("image_build works", {
 #' @param username the username of dockerhub account
 #' @param password the password of dockerhub account
 #' @param auther if the a dockerhub account has previously login,then auther should be FALSE
+#' @param use_podman logit, use podman as  backend when it is TRUE
 #' @return str
 #' 
 #' @export
-image_push <- function(containername,username = "example",password = "example",auther = FALSE){
+image_push <- function(containername,username = "example",password = "example",auther = FALSE, use_podman = FALSE){
   message("info\\this function will push your image to dockerhub")
   if (auther == FALSE){
     dockerlogin <- ""
   } else {
     dockerlogin <- glue::glue("docker login -u {username} -p {password}")
+    if (use_podman) {
+    dockerlogin = stringr::str_replace(dockerlogin,"docker","podman")
+  }
   }
   dockerpush <- glue::glue("docker push {containername}")
+  if (use_podman) {
+    dockerpush = stringr::str_replace(dockerpush,"docker","podman")
+  }
   if (grepl(username,containername)){
     if (auther == FALSE){
       system(dockerpush)
@@ -355,7 +439,8 @@ test_that("image_push works", {
   expect_true(inherits(image_push, "function")) 
 })
 ```
- # image_save
+
+# image_save
     
 ```{r function-image_save}
 #' Title
@@ -364,10 +449,11 @@ test_that("image_push works", {
 #' save image as tarfile
 #' @param imageid the image label 
 #' @param tarfile the dest output tarfile,with a full dir and its name
+#' @param use_podman logit, use podman as  backend when it is TRUE
 #' @return str
 #' 
 #' @export
-image_save <- function(imageid,tarfile){
+image_save <- function(imageid,tarfile, use_podman = FALSE){
   # 先判断是不是在列表里
   # docker save -o my_ubuntu_v3.tar runoob/ubuntu:v3
   if (!dir.exists(dirname(tarfile))){
@@ -376,6 +462,9 @@ image_save <- function(imageid,tarfile){
     )
   }
   commandline <- glue::glue("docker save -o {tarfile} {imageid}")
+  if (use_podman) {
+    commandline = stringr::str_replace(commandline,"docker","podman")
+  }
   message(glue::glue("info\\ your command is {commandline},checking the imageid..."))
   allimage <- lsimage()
   if (imageid %in% c(allimage$REPOSITORY,allimage$`IMAGE ID`)){
@@ -407,11 +496,12 @@ test_that("image_save works", {
 #' @param tarfile the dest output tarfile,with a full dir and its name
 #' @param import not using "load" command when its true
 #' @param imageid the image label 
+#' @param use_podman logit, use podman as  backend when it is TRUE
 #' 
 #' @return str
 #' 
 #' @export
-image_load <- function(tarfile,import = FALSE,imageid = NULL){
+image_load <- function(tarfile,import = FALSE,imageid = NULL, use_podman = FALSE){
   #docker load --input fedora.tar
   allimage <- lsimage()
   if (!is.null(imageid) | !(imageid %in% c(allimage$REPOSITORY,allimage$`IMAGE ID`))){
@@ -460,6 +550,7 @@ test_that("image_load works", {
 #' @param ifD the "-d" option of docker
 #' @param restart the "--restart=always" option
 #' @param run_at_once whether using "create" or "run"
+#' @param use_podman logit, use podman as  backend when it is TRUE
 #' @return str
 #' 
 #' @export
@@ -470,7 +561,7 @@ container_run <- function(imageid,
                           environmentvarible = NULL,
                           ifD = TRUE, 
                           restart = TRUE,
-                          run_at_once = TRUE){
+                          run_at_once = TRUE, use_podman = FALSE){
   if (run_at_once){
     run <- "run"
   } else {
@@ -493,6 +584,9 @@ container_run <- function(imageid,
     environmentvarible <- ""
   }
   commandline <- glue::glue("docker {run} {ifD} {restart} --name={name} {ports} {volume} {environmentvarible} {imageid}")
+  if (use_podman) {
+    commandline = stringr::str_replace(commandline,"docker","podman")
+  }
   message(glue::glue("info\\ your command is {commandline},checking the imageid..."))
   allimage <- lsimage()
   if (imageid %in% c(allimage$REPOSITORY,allimage$`IMAGE ID`)){
@@ -525,12 +619,13 @@ test_that("container_run works", {
 #' @param containerid the label of container
 #' @param mod the control mod,including stop, start ,restart and delete(rm)
 #' @param forcerm force remove the container if its true
+#' @param use_podman logit, use podman as  backend when it is TRUE
 #' @return str
 #' 
 #' @export
 container_control <- function(containerid,mod = c("stop","start","restart","rm"),
                               forcerm = FALSE
-){
+, use_podman = FALSE){
   if (mod != "rm"){
     commandline <- glue::glue("docker {mod} {containerid}")
   } else if(forcerm) {
@@ -538,7 +633,9 @@ container_control <- function(containerid,mod = c("stop","start","restart","rm")
   } else {
     commandline <- glue::glue(" docker {mod}  {containerid}")
   }
-  
+  if (use_podman) {
+    commandline = stringr::str_replace(commandline,"docker","podman")
+  }
   message(glue::glue("info\\ your command is {commandline},checking the containerid..."))
   allcontainer <-lscontainer()
   if (containerid %in% c( allcontainer$NAMES,allcontainer$`CONTAINER ID`,allcontainer$PORTS)){
@@ -575,6 +672,7 @@ test_that("container_control works", {
 #' @param ifD the "-d" option of docker
 #' @param restart the "--restart=always" option
 #' @param run_at_once whether using "create" or "run"
+#' @param use_podman logit, use podman as  backend when it is TRUE
 #' 
 #' @return str
 #' 
@@ -629,11 +727,15 @@ test_that("container_update works", {
 #' update the Parameter during the runing of container
 #' @param containerid the name of the container
 #' @param updateParameter new parameter used to update the container
+#' @param use_podman logit, use podman as  backend when it is TRUE
 #' @return str
 #' 
 #' @export
-container_updateParameter <- function(containerid,updateParameter){
+container_updateParameter <- function(containerid,updateParameter, use_podman = FALSE){
   commandline <- glue::glue("docker container update {updateParameter} {containerid}")
+  if (use_podman) {
+    commandline = stringr::str_replace(commandline,"docker","podman")
+  }
   message(glue::glue("info\\ your command is {commandline},checking the containerid..."))
   allcontainer <-lscontainer()
   if (containerid %in% c( allcontainer$NAMES,allcontainer$`CONTAINER ID`,allcontainer$PORTS)){
@@ -654,7 +756,8 @@ test_that("container_updateparameter works", {
   expect_true(inherits(container_updateParameter, "function")) 
 })
 ```
- # container_exec
+
+# container_exec
     
 ```{r function-container_exec}
 #' Title
@@ -664,13 +767,17 @@ test_that("container_updateparameter works", {
 #' 
 #' @param containerid the name of the container
 #' @param command commands need to be run inside the container
+#' @param use_podman logit, use podman as  backend when it is TRUE
 #' 
 #' @return str
 #' 
 #' @export
-container_exec <- function(containerid,command){
+container_exec <- function(containerid,command, use_podman = FALSE){
   # docker exec -it 9df70f9a0714 /bin/bash
   commandline <- glue::glue("docker exec -it {containerid} /bin/bash {command} ")
+  if (use_podman) {
+    commandline = stringr::str_replace(commandline,"docker","podman")
+  }
   message(glue::glue("info\\ your command is {commandline},checking the containerid..."))
   allcontainer <-lscontainer()
   if (containerid %in% c( allcontainer$NAMES,allcontainer$`CONTAINER ID`,allcontainer$PORTS)){
@@ -699,12 +806,13 @@ test_that("container_exec works", {
 #' Description
 #' initial container by docker compose
 #' @param yamlfile the docker compose yaml file 
+#' @param use_podman logit, use podman as  backend when it is TRUE
 #'
 #' 
 #' @return str
 #' 
 #' @export
-container_dockercompose <- function(yamlfile){
+container_dockercompose <- function(yamlfile, use_podman = FALSE){
   if (file.exists(yamlfile)){
     system(command = glue::glue("docker-compose -f {yamlfile} up -d"))
   } else {
@@ -723,7 +831,69 @@ test_that("container_dockercompose works", {
   expect_true(inherits(container_dockercompose, "function")) 
 })
 ```
+
+# docker_info
     
+```{r function-docker_info}
+#' docker information
+#' 
+#' display the information of the installed docker
+#' 
+#' @param use_podman logit, use podman as  backend when it is TRUE
+#' @return str
+#' 
+#' @export
+docker_info <- function(use_podman = FALSE){
+  if (use_podman) {
+     system("podman info")
+  }else {
+    system("docker info")
+  }  
+}
+```
+  
+```{r example-docker_info}
+docker_info()
+```
+  
+```{r tests-docker_info}
+test_that("docker_info works", {
+  expect_true(inherits(docker_info, "function")) 
+})
+```
+
+# docker_version
+    
+```{r function-docker_version}
+#' docker information
+#' 
+#' display the information of the installed docker
+#' 
+#' @param use_podman logit, use podman as  backend when it is TRUE
+#' @return str
+#' 
+#' @export
+docker_version <- function(use_podman = FALSE){
+    if (use_podman) {
+     system("podman version")
+  }else {
+    system("docker version")
+  }  
+}
+```
+  
+```{r example-docker_version}
+docker_version()
+```
+  
+```{r tests-docker_version}
+test_that("docker_version works", {
+  expect_true(inherits(docker_version, "function")) 
+})
+```
+
+
+ 
 <!-- 
 # Inflate your package
 

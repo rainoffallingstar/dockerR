@@ -69,6 +69,19 @@ lsimage()
 
   
 
+# docker_stats
+
+    
+
+  
+
+```{r example-docker_stats}
+docker_stats()
+```
+
+  
+
+  
 
 
 # image_rmi
@@ -133,7 +146,8 @@ image_push("fallingstar10/gmadeomicsrocker:base",username = "fallingstar10")
 
   
 
- # image_save
+# image_save
+
     
 
   
@@ -204,7 +218,8 @@ container_updateParameter("rsshubnew","--restart=always")
 
   
 
- # container_exec
+# container_exec
+
     
 
   
@@ -227,7 +242,31 @@ container_dockercompose("./dev/nextcloud_compose.yaml")
 
   
 
+# docker_info
+
     
+
+  
+
+```{r example-docker_info}
+docker_info()
+```
+
+  
+
+# docker_version
+
+    
+
+  
+
+```{r example-docker_version}
+docker_version()
+```
+
+  
+
+ 
 <!-- 
 
 # Inflate your package

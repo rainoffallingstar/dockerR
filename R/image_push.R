@@ -34,33 +34,3 @@ image_push <- function(containername,username = "example",password = "example",a
     message("conflit found in the containername and the username,please re-taging...")
   }
 }
-
-#' Title
-#' image_save
-#' Description
-#' save image as tarfile
-#' @param imageid the image label 
-#' @param tarfile the dest output tarfile,with a full dir and its name
-#' @return str
-#' 
-#' @export
-#' @examples
-#' image_save("diygod/rsshub","./rsshub.tar")
-image_save <- function(imageid,tarfile){
-  # 先判断是不是在列表里
-  # docker save -o my_ubuntu_v3.tar runoob/ubuntu:v3
-  if (!dir.exists(dirname(tarfile))){
-    fs::dir_create(
-      dirname(tarfile)
-    )
-  }
-  commandline <- glue::glue("docker save -o {tarfile} {imageid}")
-  message(glue::glue("info\\ your command is {commandline},checking the imageid..."))
-  allimage <- lsimage()
-  if (imageid %in% c(allimage$REPOSITORY,allimage$`IMAGE ID`)){
-    system(commandline)
-  }else{
-    message("the imageid is not correct")
-  }
-  return(tarfile)
-}
