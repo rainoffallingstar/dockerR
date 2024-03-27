@@ -55,12 +55,24 @@ pak::pak("rainoffallingstar/dockerR")
 -   container_exec : run commands inside the container
 
 -   container_dockercompose: run/initial a container by a yaml file with docker compose
+
 -   docker_info: show docker info
+
 -   docker_version : show docker version
+
 -   docker_stats: show container stats under running
 
-#### RoadMap
+#### Tips
 
+-   How to schdule a rscript in windows
+
+    > by run the following commands in the terminal
+
+    ``` bash
+    schtasks /create /tn "Run R Script at 6 AM" /tr "C:\Program Files\R\R-4.3.3\bin\x64\Rscript.exe D:\fallingstarGitcode\dockerR\dev\example\container-autoupdate.R" /sc daily /st 06:00
+    ```
+
+#### RoadMap
 
 -   clean the code (a bit mass now but runs well ,lol)
 
