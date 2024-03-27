@@ -75,7 +75,6 @@ pak::pak("rainoffallingstar/dockerR")
     # in macos & linux
     crontab -e 
     0 6 * * * /usr/bin/Rscript /path/to/your/script.R
-     
     ```
 
 #### RoadMap
