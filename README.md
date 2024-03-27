@@ -66,7 +66,7 @@ pak::pak("rainoffallingstar/dockerR")
 
 -   How to schdule a rscript in windows
 
-    > by run the following commands in the terminal
+    > by run the following commands in the terminal as an example
 
     ``` bash
     schtasks /create /tn "Run R Script at 6 AM" /tr "C:\Program Files\R\R-4.3.3\bin\x64\Rscript.exe D:\fallingstarGitcode\dockerR\dev\example\container-autoupdate.R" /sc daily /st 06:00
